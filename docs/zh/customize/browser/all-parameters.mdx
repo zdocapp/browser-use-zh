@@ -21,16 +21,16 @@ mode: "wide"
 ## 浏览器行为
 
 - `keep_alive` (默认: `None`): 代理完成后保持浏览器运行
-- `allowed_domains`: 限制导航到特定域名。域名模式格式：
+- `allowed_domains`: 限制导航到特定域名。域名模式格式:
   - `'example.com'` - 仅匹配 `https://example.com/*`
   - `'*.example.com'` - 匹配 `https://example.com/*` 和任何子域名 `https://*.example.com/*`
   - `'http*://example.com'` - 同时匹配 `http://` 和 `https://` 协议
   - `'chrome-extension://*'` - 匹配任何 Chrome 扩展 URL
-  - **安全**: 出于安全考虑，TLD 中的通配符（例如 `example.*`）**不允许**
+  - **安全性**: 出于安全考虑，TLD 中的通配符 (例如 `example.*`) **不允许**使用
   - 使用列表格式如 `['*.google.com', 'https://example.com', 'chrome-extension://*']`
-- `enable_default_extensions` (默认: `True`): 加载自动化扩展（uBlock Origin、cookie 处理器、ClearURLs）
-- `cross_origin_iframes` (默认: `False`): 启用跨域 iframe 支持（可能增加复杂性）
-- `is_local` (默认: `True`): 是否为本地浏览器实例。对于远程浏览器设置为 `False`。如果设置了 `executable_path`，将自动设置为 `True`。这会影响下载行为。
+- `enable_default_extensions` (默认: `True`): 加载自动化扩展 (uBlock Origin, cookie handlers, ClearURLs)
+- `cross_origin_iframes` (默认: `False`): 启用跨域 iframe 支持 (可能增加复杂性)
+- `is_local` (默认: `True`): 是否为本地浏览器实例。对于远程浏览器设置为 `False`。如果设置了 `executable_path`，将自动设置为 `True`。这会影响您的下载行为。
 
 ## 用户数据与配置文件
 
@@ -66,7 +66,8 @@ mode: "wide"
 
 ## AI 集成
 
-- `highlight_elements` (默认: `True`): 为 AI 视觉高亮可交互元素
+- `highlight_elements` (默认: `True`): 为 AI 视觉高亮交互元素
+- `paint_order_filtering` (默认: `True`): 启用绘制顺序过滤，通过移除被其他元素隐藏的元素来优化 DOM 树。略微实验性功能
 
 ## 下载与文件
 

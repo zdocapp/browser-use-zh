@@ -1,0 +1,252 @@
+---
+
+title: "Supported Models"
+description: "选择您喜欢的LLM"
+icon: "robot"
+
+---
+
+### 推荐
+
+- 最佳准确性：`O3`
+- 最快速度：groq平台上的`llama4`
+- 均衡选择：快速+便宜+智能：`gemini-2.5-flash`或`gpt-4.1-mini`
+
+### OpenAI [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/gpt-4.1.py)
+
+推荐使用`O3`模型以获得最佳性能。
+
+```python
+from browser_use import Agent, ChatOpenAI
+
+# Initialize the model
+llm = ChatOpenAI(
+    model="o3",
+)
+
+# Create agent with the model
+agent = Agent(
+    task="...", # Your task here
+    llm=llm
+)
+```
+
+必需的环境变量：
+
+```bash .env
+OPENAI_API_KEY=
+```
+
+<Info>
+  您可以通过将模型名称传递给`ChatOpenAI`类，使用自定义URL（或任何其他正常OpenAI API调用所需的参数）来使用任何OpenAI兼容模型。
+</Info>
+
+### Anthropic [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/claude-4-sonnet.py)
+
+```python
+from browser_use import Agent, ChatAnthropic
+
+# Initialize the model
+llm = ChatAnthropic(
+    model="claude-sonnet-4-0",
+)
+
+# Create agent with the model
+agent = Agent(
+    task="...", # Your task here
+    llm=llm
+)
+```
+
+并添加变量：
+
+```bash .env
+ANTHROPIC_API_KEY=
+```
+
+### Azure OpenAI [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/azure_openai.py)
+
+```python
+from browser_use import Agent, ChatAzureOpenAI
+from pydantic import SecretStr
+import os
+
+# Initialize the model
+llm = ChatAzureOpenAI(
+    model="o4-mini",
+)
+
+# Create agent with the model
+agent = Agent(
+    task="...", # Your task here
+    llm=llm
+)
+```
+
+必需的环境变量：
+
+```bash .env
+AZURE_OPENAI_ENDPOINT=https://your-endpoint.openai.azure.com/
+AZURE_OPENAI_API_KEY=
+```
+
+### Gemini [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/gemini.py)
+
+> [!IMPORTANT] `GEMINI_API_KEY`是旧的环境变量名称，自2025年5月起应称为`GOOGLE_API_KEY`。
+
+```python
+from browser_use import Agent, ChatGoogle
+from dotenv import load_dotenv
+
+# Read GOOGLE_API_KEY into env
+load_dotenv()
+
+# Initialize the model
+llm = ChatGoogle(model='gemini-2.5-flash')
+
+# Create agent with the model
+agent = Agent(
+    task="Your task here",
+    llm=llm
+)
+```
+
+必需的环境变量：
+
+```bash .env
+GOOGLE_API_KEY=
+```
+
+### AWS Bedrock [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/aws.py)
+
+AWS Bedrock 通过单一 API 提供对多个模型提供商的访问。我们既支持通用的 AWS Bedrock 客户端，也支持特定提供商的便捷类。
+
+#### 通用 AWS Bedrock（支持所有提供商）
+
+```python
+from browser_use import Agent, ChatAWSBedrock
+
+# Works with any Bedrock model (Anthropic, Meta, AI21, etc.)
+llm = ChatAWSBedrock(
+    model="anthropic.claude-3-5-sonnet-20240620-v1:0",  # or any Bedrock model
+    aws_region="us-east-1",
+)
+
+# Create agent with the model
+agent = Agent(
+    task="Your task here",
+    llm=llm
+)
+```
+
+#### 通过 AWS Bedrock 使用 Anthropic Claude（便捷类）
+
+```python
+from browser_use import Agent, ChatAnthropicBedrock
+
+# Anthropic-specific class with Claude defaults
+llm = ChatAnthropicBedrock(
+    model="anthropic.claude-3-5-sonnet-20240620-v1:0",
+    aws_region="us-east-1",
+)
+
+# Create agent with the model
+agent = Agent(
+    task="Your task here",
+    llm=llm
+)
+```
+
+#### AWS 身份验证
+
+必需的环境变量：
+
+```bash .env
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+```
+
+您也可以使用 AWS 配置文件或 IAM 角色替代环境变量。该实现支持：
+
+- 环境变量（`AWS_ACCESS_KEY_ID`、`AWS_SECRET_ACCESS_KEY`、`AWS_DEFAULT_REGION`）
+- AWS 配置文件和凭证文件
+- IAM 角色（在 EC2 上运行时）
+- 用于临时凭证的会话令牌
+- AWS SSO 身份验证（`aws_sso_auth=True`）
+
+## Groq [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/llama4-groq.py)
+
+```python
+from browser_use import Agent, ChatGroq
+
+llm = ChatGroq(model="meta-llama/llama-4-maverick-17b-128e-instruct")
+
+agent = Agent(
+    task="Your task here",
+    llm=llm
+)
+```
+
+必需的环境变量：
+
+```bash .env
+GROQ_API_KEY=
+```
+
+## Ollama
+
+1. 安装 Ollama：https://github.com/ollama/ollama
+2. 运行 `ollama serve` 启动服务器
+3. 在新终端中，安装您想使用的模型：`ollama pull llama3.1:8b`（该模型大小为 4.9GB）
+
+```python
+from browser_use import Agent, ChatOllama
+
+llm = ChatOllama(model="llama3.1:8b")
+```
+
+## Langchain
+
+关于如何将 Langchain 与 Browser Use 结合使用的[示例](https://github.com/browser-use/browser-use/blob/main/examples/models/langchain)。
+
+## Qwen [示例](https://github.com/browser-use/browser-use/blob/main/examples/models/qwen.py)
+
+目前，仅推荐在浏览器中使用 `qwen-vl-max` 模型。其他 Qwen 模型（包括 `qwen-max`）在动作模式格式方面存在问题。
+较小的 Qwen 模型可能返回错误的动作模式格式（例如返回 `actions: [{"go_to_url": "google.com"}]` 而不是 `[{"go_to_url": {"url": "google.com"}}]`）。如果您想使用其他模型，请在提示中添加正确动作格式的具体示例。
+
+```python
+from browser_use import Agent, ChatOpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# Get API key from https://modelstudio.console.alibabacloud.com/?tab=playground#/api-key
+api_key = os.getenv('ALIBABA_CLOUD')
+base_url = 'https://dashscope-intl.aliyuncs.com/compatible-mode/v1'
+
+llm = ChatOpenAI(model='qwen-vl-max', api_key=api_key, base_url=base_url)
+
+agent = Agent(
+    task="Your task here",
+    llm=llm,
+    use_vision=True
+)
+```
+
+必需的环境变量：
+
+```bash .env
+ALIBABA_CLOUD=
+```
+
+## 其他模型（DeepSeek、Novita、X...）
+
+我们支持所有可通过 OpenAI 兼容 API 调用的其他模型。我们欢迎为更多提供商提交 PR。
+
+**可用示例：**
+
+- [DeepSeek](https://github.com/browser-use/browser-use/blob/main/examples/models/deepseek-chat.py)
+- [Novita](https://github.com/browser-use/browser-use/blob/main/examples/models/novita.py)
+- [OpenRouter](https://github.com/browser-use/browser-use/blob/main/examples/models/openrouter.py)

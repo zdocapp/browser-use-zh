@@ -1,0 +1,95 @@
+---
+title: "可观测性"
+description: "追踪浏览器使用代理的执行步骤和浏览器会话"
+icon: "eye"
+mode: "wide"
+---
+
+## 概述
+
+Browser Use 与 [Laminar](https://lmnr.ai) 具有原生集成 - 这是一个用于追踪、评估和标注 AI 代理的开源平台。
+在 [Laminar 文档](https://docs.lmnr.ai) 中了解更多关于 Laminar 的信息。
+
+## 配置
+
+在 [Laminar Cloud](https://lmnr.ai) 上注册并从您的项目设置中获取密钥。
+设置 `LMNR_PROJECT_API_KEY` 环境变量。
+
+```bash
+pip install 'lmnr[all]'
+export LMNR_PROJECT_API_KEY=<your-project-api-key>
+```
+
+## 使用指南
+
+然后，您只需在项目顶部初始化 Laminar，Browser Use 和会话录制都将被自动追踪。
+
+```python {5-8}
+from browser_use import Agent, ChatOpenAI
+import asyncio
+
+from lmnr import Laminar, Instruments
+# this line auto-instruments Browser Use and any browser you use (local or remote)
+Laminar.initialize(project_api_key="...", disabled_instruments={Instruments.BROWSER_USE})
+
+async def main():
+    agent = Agent(
+        task="open google, search Laminar AI",
+        llm=ChatOpenAI(model="gpt-4.1-mini"),
+    )
+    await agent.run()
+
+asyncio.run(main())
+```
+
+## 查看追踪记录
+
+您可以在 Laminar UI 中查看追踪记录，方法是进入您项目中的追踪选项卡。
+当您选择一个追踪记录时，您可以看到浏览器会话录制和代理执行步骤。
+
+浏览器会话的时间线与代理执行步骤同步，时间线高亮显示表示代理当前步骤与浏览器会话同步。
+在追踪视图中，您还可以看到代理的当前步骤、正在使用的工具以及工具的输入和输出。工具在时间线中以黄色高亮显示。
+
+<img className="block" src="/images/laminar.png" alt="Laminar" />
+
+## Laminar
+
+要了解更多关于追踪和评估您的浏览器代理的信息，请查看 [Laminar 文档](https://docs.lmnr.ai)。
+
+## Browser Use 云认证
+
+Browser Use 可将您的代理运行同步至云端，便于查看和共享。为保护您的数据，需要进行身份验证。
+
+### 快速设置
+
+```bash
+# Authenticate once to enable cloud sync for all future runs
+browser-use auth
+# Or if using module directly:
+python -m browser_use.cli auth
+```
+
+**注意**：云端同步默认启用。若您已禁用该功能，可通过 `export BROWSER_USE_CLOUD_SYNC=true` 重新启用。
+
+### 手动身份验证
+
+```python
+# Authenticate from code after task completion
+from browser_use import Agent
+
+agent = Agent(task="your task")
+await agent.run()
+
+# Later, authenticate for future runs
+await agent.authenticate_cloud_sync()
+```
+
+### 重置身份验证
+
+```bash
+# Force re-authentication with a different account
+rm ~/.config/browseruse/cloud_auth.json
+browser-use auth
+```
+
+**注意**：身份验证采用 OAuth 设备流程 - 您必须在命令运行期间完成验证流程。链接在轮询停止后将失效。

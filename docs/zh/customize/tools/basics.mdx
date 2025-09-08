@@ -1,0 +1,25 @@
+---
+title: "基础概念"
+description: "工具是智能体用于与世界交互的功能函数。"
+icon: "play"
+mode: "wide"
+---
+
+## 快速示例
+
+```python
+from browser_use import Tools, ActionResult
+
+tools = Tools()
+
+@tools.action('Ask human for help with a question')
+def ask_human(question: str) -> ActionResult:
+    answer = input(f'{question} > ')
+    return f'The human responded with: {answer}'
+
+agent = Agent(
+    task='Ask human for help',
+    llm=llm,
+    tools=tools,
+)
+```

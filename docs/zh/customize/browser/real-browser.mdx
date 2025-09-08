@@ -1,0 +1,52 @@
+---
+title: "真实浏览器"
+description: ""
+icon: "arrow-right-to-bracket"
+---
+
+连接您现有的 Chrome 浏览器以保留身份验证状态。
+
+## 基础示例
+
+```python
+from browser_use import Agent, Browser, ChatOpenAI
+
+# Connect to your existing Chrome browser
+browser = Browser(
+    executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    user_data_dir='~/Library/Application Support/Google/Chrome',
+    profile_directory='Default',
+)
+
+agent = Agent(
+    task='Visit https://duckduckgo.com and search for "browser-use founders"',
+    browser=browser,
+    llm=ChatOpenAI(model='gpt-4.1-mini'),
+)
+async def main():
+	await agent.run()
+```
+
+> **注意：** 运行此示例前需要完全关闭 Chrome。此外，Google 目前阻止了这种方法，因此我们改用 DuckDuckGo。
+
+## 工作原理
+
+1. **`executable_path`** - Chrome 安装路径
+2. **`user_data_dir`** - Chrome 配置文件文件夹（保存 cookies、扩展、书签）
+3. **`profile_directory`** - 特定配置文件名称（Default、Profile 1 等）
+
+## 平台路径
+
+```python
+# macOS
+executable_path='/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+user_data_dir='~/Library/Application Support/Google/Chrome'
+
+# Windows
+executable_path='C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'
+user_data_dir='%LOCALAPPDATA%\\Google\\Chrome\\User Data'
+
+# Linux
+executable_path='/usr/bin/google-chrome'
+user_data_dir='~/.config/google-chrome'
+```

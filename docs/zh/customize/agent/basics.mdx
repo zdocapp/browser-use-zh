@@ -1,0 +1,25 @@
+---
+title: "基础入门"
+description: ""
+icon: "play"
+mode: "wide"
+---
+
+```python
+from browser_use import Agent, ChatOpenAI
+
+agent = Agent(
+    task="Search for latest news about AI",
+    llm=ChatOpenAI(model="gpt-4.1-mini"),
+)
+
+async def main():
+    history = await agent.run(max_steps=100)
+```
+
+- `task`: 您想要自动化的任务。
+- `llm`: 您偏好的 LLM。请参阅<a href="/customize/supported-models">支持的模型</a>。
+
+代理通过异步的 `run()` 方法执行：
+
+- `max_steps`（默认值：`100`）：代理可以执行的最大步骤数。

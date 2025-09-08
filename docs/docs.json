@@ -9,10 +9,7 @@
   },
   "favicon": "/favicon.ico",
   "contextual": {
-    "options": [
-      "copy",
-      "view"
-    ]
+    "options": ["copy", "view"]
   },
   "fonts": {
     "family": "Geist"
@@ -77,67 +74,98 @@
     }
   ],
   "navigation": {
-    "tabs": [
+    "languages": [
       {
-        "tab": "Library",
-        "groups": [
+        "language": "en",
+        "tabs": [
           {
-            "group": "Get Started",
-            "pages": [
-              "introduction",
-              "quickstart",
-              "quickstart_llm"
-            ]
-          },
-          {
-            "group": "Customize",
-            "pages": [
+            "tab": "Library",
+            "groups": [
               {
-                "group": "Agent",
-                "icon": "robot",
-                "isDefaultOpen": true,
+                "group": "Get Started",
+                "pages": ["introduction", "quickstart", "quickstart_llm"]
+              },
+              {
+                "group": "Customize",
                 "pages": [
-                  "customize/agent/basics",
-                  "customize/agent/supported-models",
-                  "customize/agent/output-format",
-                  "customize/agent/all-parameters"
+                  {
+                    "group": "Agent",
+                    "icon": "robot",
+                    "isDefaultOpen": true,
+                    "pages": [
+                      "customize/agent/basics",
+                      "customize/agent/supported-models",
+                      "customize/agent/output-format",
+                      "customize/agent/all-parameters"
+                    ]
+                  },
+                  {
+                    "group": "Browser",
+                    "icon": "window",
+                    "isDefaultOpen": false,
+                    "pages": [
+                      "customize/browser/basics",
+                      "customize/browser/real-browser",
+                      "customize/browser/remote",
+                      "customize/browser/all-parameters"
+                    ]
+                  },
+                  {
+                    "group": "Tools",
+                    "icon": "wrench",
+                    "isDefaultOpen": false,
+                    "pages": [
+                      "customize/tools/basics",
+                      "customize/tools/available",
+                      "customize/tools/add",
+                      "customize/tools/remove",
+                      "customize/tools/response"
+                    ]
+                  },
+                  {
+                    "group": "Examples",
+                    "icon": "folder-open",
+                    "pages": [
+                      "customize/examples/fast-agent",
+                      "customize/examples/follow-up-tasks",
+                      "customize/examples/parallel-browser",
+                      "customize/examples/playwright-integration",
+                      "customize/examples/sensitive-data",
+                      "customize/examples/secure",
+                      "customize/examples/more-examples",
+                      "customize/examples/prompting-guide"
+                    ]
+                  }
                 ]
               },
               {
-                "group": "Browser",
-                "icon": "window",
-                "isDefaultOpen": false,
+                "group": "Development",
                 "pages": [
-                  "customize/browser/basics",
-                  "customize/browser/real-browser",
-                  "customize/browser/remote",
-                  "customize/browser/all-parameters"
-                ]
-              },
-              {
-                "group": "Tools",
-                "icon": "wrench",
-                "isDefaultOpen": false,
-                "pages": [
-                  "customize/tools/basics",
-                  "customize/tools/available",
-                  "customize/tools/add",
-                  "customize/tools/remove",
-                  "customize/tools/response"
-                ]
-              },
-              {
-                "group": "Examples",
-                "icon": "folder-open",
-                "pages": [
-                  "customize/examples/fast-agent",
-                  "customize/examples/follow-up-tasks",
-                  "customize/examples/parallel-browser",
-                  "customize/examples/playwright-integration",
-                  "customize/examples/sensitive-data",
-                  "customize/examples/secure",
-                  "customize/examples/more-examples",
-                  "customize/examples/prompting-guide"
+                  {
+                    "group": "Contribution",
+                    "icon": "github",
+                    "isDefaultOpen": true,
+                    "pages": [
+                      "development/setup/local-setup",
+                      "development/setup/contribution-guide"
+                    ]
+                  },
+                  {
+                    "group": "Advanced",
+                    "icon": "gear",
+                    "isDefaultOpen": false,
+                    "pages": ["customize/hooks"]
+                  },
+                  {
+                    "group": "Monitoring",
+                    "icon": "chart-mixed",
+                    "isDefaultOpen": false,
+                    "pages": [
+                      "development/monitoring/observability",
+                      "development/monitoring/telemetry"
+                    ]
+                  },
+                  "development/get-help"
                 ]
               },
               {
@@ -151,67 +179,169 @@
             ]
           },
           {
-            "group": "Development",
-            "pages": [
+            "tab": "Cloud",
+            "hidden": true,
+            "versions": [
               {
-                "group": "Contribution",
-                "icon": "github",
-                "isDefaultOpen": true,
-                "pages": [
-                  "development/setup/local-setup",
-                  "development/setup/contribution-guide"
+                "version": "v1",
+                "groups": [
+                  {
+                    "group": "Get Started",
+                    "pages": [
+                      "cloud/v1/quickstart",
+                      "cloud/v1/search",
+                      "cloud/v1/pricing"
+                    ]
+                  },
+                  {
+                    "group": "Guides",
+                    "pages": [
+                      "cloud/v1/implementation",
+                      "cloud/v1/custom-sdk",
+                      "cloud/v1/webhooks",
+                      "cloud/v1/authentication",
+                      "cloud/v1/n8n-browser-use-integration"
+                    ]
+                  },
+                  {
+                    "group": "REST API reference",
+                    "openapi": "https://api.browser-use.com/api/v1/openapi.json"
+                  }
                 ]
-              },
-              {
-                "group": "Advanced",
-                "icon": "gear",
-                "isDefaultOpen": false,
-                "pages": [
-                  "customize/hooks"
-                ]
-              },
-              {
-                "group": "Monitoring",
-                "icon": "chart-mixed",
-                "isDefaultOpen": false,
-                "pages": [
-                  "development/monitoring/observability",
-                  "development/monitoring/telemetry"
-                ]
-              },
-              "development/get-help"
+              }
             ]
           }
         ]
       },
       {
-        "tab": "Cloud",
-        "hidden": true,
-        "versions": [
+        "language": "cn",
+        "tabs": [
           {
-            "version": "v1",
+            "tab": "Library",
             "groups": [
               {
                 "group": "Get Started",
                 "pages": [
-                  "cloud/v1/quickstart",
-                  "cloud/v1/search",
-                  "cloud/v1/pricing"
+                  "zh/introduction",
+                  "zh/quickstart",
+                  "zh/quickstart_llm"
                 ]
               },
               {
-                "group": "Guides",
+                "group": "Customize",
                 "pages": [
-                  "cloud/v1/implementation",
-                  "cloud/v1/custom-sdk",
-                  "cloud/v1/webhooks",
-                  "cloud/v1/authentication",
-                  "cloud/v1/n8n-browser-use-integration"
+                  {
+                    "group": "Agent",
+                    "icon": "robot",
+                    "isDefaultOpen": true,
+                    "pages": [
+                      "zh/customize/agent/basics",
+                      "zh/customize/agent/supported-models",
+                      "zh/customize/agent/output-format",
+                      "zh/customize/agent/all-parameters"
+                    ]
+                  },
+                  {
+                    "group": "Browser",
+                    "icon": "window",
+                    "isDefaultOpen": false,
+                    "pages": [
+                      "zh/customize/browser/basics",
+                      "zh/customize/browser/real-browser",
+                      "zh/customize/browser/remote",
+                      "zh/customize/browser/all-parameters"
+                    ]
+                  },
+                  {
+                    "group": "Tools",
+                    "icon": "wrench",
+                    "isDefaultOpen": false,
+                    "pages": [
+                      "zh/customize/tools/basics",
+                      "zh/customize/tools/available",
+                      "zh/customize/tools/add",
+                      "zh/customize/tools/remove",
+                      "zh/customize/tools/response"
+                    ]
+                  },
+                  {
+                    "group": "Examples",
+                    "icon": "folder-open",
+                    "pages": [
+                      "zh/customize/examples/fast-agent",
+                      "zh/customize/examples/follow-up-tasks",
+                      "zh/customize/examples/parallel-browser",
+                      "zh/customize/examples/playwright-integration",
+                      "zh/customize/examples/sensitive-data",
+                      "zh/customize/examples/secure",
+                      "zh/customize/examples/more-examples",
+                      "zh/customize/examples/prompting-guide"
+                    ]
+                  }
                 ]
               },
               {
-                "group": "REST API reference",
-                "openapi": "https://api.browser-use.com/api/v1/openapi.json"
+                "group": "Development",
+                "pages": [
+                  {
+                    "group": "Contribution",
+                    "icon": "github",
+                    "isDefaultOpen": true,
+                    "pages": [
+                      "zh/development/setup/local-setup",
+                      "zh/development/setup/contribution-guide"
+                    ]
+                  },
+                  {
+                    "group": "Advanced",
+                    "icon": "gear",
+                    "isDefaultOpen": false,
+                    "pages": ["zh/customize/hooks"]
+                  },
+                  {
+                    "group": "Monitoring",
+                    "icon": "chart-mixed",
+                    "isDefaultOpen": false,
+                    "pages": [
+                      "zh/development/monitoring/observability",
+                      "zh/development/monitoring/telemetry"
+                    ]
+                  },
+                  "zh/development/get-help"
+                ]
+              }
+            ]
+          },
+          {
+            "tab": "Cloud",
+            "hidden": true,
+            "versions": [
+              {
+                "version": "v1",
+                "groups": [
+                  {
+                    "group": "Get Started",
+                    "pages": [
+                      "zh/cloud/v1/quickstart",
+                      "zh/cloud/v1/search",
+                      "zh/cloud/v1/pricing"
+                    ]
+                  },
+                  {
+                    "group": "Guides",
+                    "pages": [
+                      "zh/cloud/v1/implementation",
+                      "zh/cloud/v1/custom-sdk",
+                      "zh/cloud/v1/webhooks",
+                      "zh/cloud/v1/authentication",
+                      "zh/cloud/v1/n8n-browser-use-integration"
+                    ]
+                  },
+                  {
+                    "group": "REST API reference",
+                    "openapi": "https://api.browser-use.com/api/v1/openapi.json"
+                  }
+                ]
               }
             ]
           }
@@ -229,11 +359,7 @@
       "display": "interactive"
     },
     "examples": {
-      "languages": [
-        "javascript",
-        "curl",
-        "python"
-      ],
+      "languages": ["javascript", "curl", "python"],
       "required": true
     }
   },

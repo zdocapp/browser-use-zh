@@ -1,0 +1,47 @@
+---
+title: "敏感数据处理"
+description: "安全处理机密信息，避免向LLM发送个人身份信息（PII）和密码。"
+icon: "shield"
+mode: "wide"
+---
+
+```python
+import os
+from browser_use import Agent, Browser, ChatOpenAI
+os.environ['ANONYMIZED_TELEMETRY'] = "false"
+
+
+company_credentials = {'x_user': 'your-real-username@email.com', 'x_pass': 'your-real-password123'}
+
+# Option 1: Secrets available for all websites
+sensitive_data = company_credentials
+
+# Option 2: Secrets per domain with regex
+# sensitive_data = {
+#     'https://*.example-staging.com': company_credentials,
+#     'http*://test.example.com': company_credentials,
+#     'https://example.com': company_credentials,
+#     'https://google.com': {'g_email': 'user@gmail.com', 'g_pass': 'google_password'},
+# }
+
+
+agent = Agent(
+    task='Log into example.com with username x_user and password x_pass',
+    sensitive_data=sensitive_data,
+    use_vision=False,  #  Disable vision to prevent LLM seeing sensitive data in screenshots
+    llm=ChatOpenAI(model='gpt-4.1-mini'),
+)
+async def main():
+await agent.run()
+```
+
+## 工作原理
+
+1. **文本过滤**：LLM仅能看到占位符（`x_user`、`x_pass`），我们会从输入文本中过滤您的敏感数据。
+2. **DOM操作**：真实值在LLM调用后直接注入到表单字段中
+
+## 最佳实践
+
+- 使用 `Browser(allowed_domains=[...])` 限制导航范围
+- 设置 `use_vision=False` 防止截图泄露
+- 尽可能使用 `storage_state='./auth.json'` 存储登录cookies而非密码

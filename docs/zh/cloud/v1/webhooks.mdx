@@ -1,0 +1,145 @@
+---
+title: "Webhooks"
+description: "了解如何将 Webhooks 与 Browser Use Cloud API 集成"
+icon: "code"
+mode: "wide"
+---
+
+Webhooks 允许您接收关于 Browser Use 任务中事件的实时通知。本指南将展示如何设置和验证 webhook 端点。
+
+## 前置条件
+
+<Note>
+  您需要有效的订阅才能创建 webhooks。请查看您的账单页面
+  [cloud.browser-use.com/billing](https://cloud.browser-use.com/billing)
+</Note>
+
+## 设置 Webhooks
+
+要接收 webhook 通知，您需要：
+
+1. 创建一个能够接收 HTTPS POST 请求的端点
+2. 在 Browser Use 仪表板中配置您的 webhook URL
+3. 实施签名验证以确保 webhook 的真实性
+
+<Note>
+  在仪表板中添加 webhook URL 时，它必须是能够接收 POST 请求的有效 HTTPS URL。
+  创建时，我们将发送一个测试负载 `{"type": "test", "timestamp": "2024-03-21T12:00:00Z", "payload": {"test": "ok"}}` 来验证端点是否正常工作，然后再创建实际的 webhook！
+</Note>
+
+## Webhook 事件
+
+Browser Use 发送各种类型的事件。每个事件都有特定的类型和负载结构。
+
+### 事件类型
+
+当前支持的事件：
+
+| 事件类型                 | 描述                      |
+| -------------------------- | -------------------------------- |
+| `agent.task.status_update` | 运行中任务的状态更新 |
+
+### 任务状态更新
+
+`agent.task.status_update` 事件包含以下状态：
+
+| 状态           | 描述                               |
+| -------------- | ---------------------------------- |
+| `initializing` | 任务正在初始化                     |
+| `started`      | 任务已开始（浏览器可用）           |
+| `paused`       | 任务在执行过程中被暂停             |
+| `stopped`      | 任务在执行过程中被停止             |
+| `finished`     | 任务已完成                         |
+
+## Webhook 负载结构
+
+每个 webhook 调用包含：
+
+- 包含事件详情的 JSON 负载
+- 带有当前时间戳的 `X-Browser-Use-Timestamp` 头部
+- 用于验证的 `X-Browser-Use-Signature` 头部
+
+负载遵循以下结构：
+
+```json
+{
+  "type": "agent.task.status_update",
+  "timestamp": "2025-05-25T09:22:22.269116+00:00",
+  "payload": {
+    "session_id": "cd9cc7bf-e3af-4181-80a2-73f083bc94b4",
+    "task_id": "5b73fb3f-a3cb-4912-be40-17ce9e9e1a45",
+    "status": "finished",
+    "metadata": {
+      "campaign": "q4-automation",
+      "team": "marketing"
+    }
+  }
+}
+```
+
+webhook 负载现在包含一个 `metadata` 字段，其中包含任务创建时提供的任何自定义键值对。这使您能够将 webhook 事件与内部跟踪系统关联起来。
+
+## 实现 Webhook 验证
+
+为确保 webhook 的真实性，您必须验证签名。以下是使用 FastAPI 的 Python 示例实现：
+
+```python
+import uvicorn
+import hmac
+import hashlib
+import json
+import os
+
+from fastapi import FastAPI, Request, HTTPException
+
+app = FastAPI()
+
+SECRET_KEY = os.environ['SECRET_KEY']
+
+def verify_signature(payload: dict, timestamp: str, received_signature: str) -> bool:
+    message = f'{timestamp}.{json.dumps(payload, separators=(",", ":"), sort_keys=True)}'
+    expected_signature = hmac.new(SECRET_KEY.encode(), message.encode(), hashlib.sha256).hexdigest()
+    return hmac.compare_digest(expected_signature, received_signature)
+
+@app.post('/webhook')
+async def webhook(request: Request):
+    body = await request.json()
+
+    timestamp = request.headers.get('X-Browser-Use-Timestamp')
+    signature = request.headers.get('X-Browser-Use-Signature')
+    if not timestamp or not signature:
+        raise HTTPException(status_code=400, detail='Missing timestamp or signature')
+
+    if not verify_signature(body, timestamp, signature):
+        raise HTTPException(status_code=403, detail='Invalid signature')
+
+    # Handle different event types
+    event_type = body.get('type')
+    if event_type == 'agent.task.status_update':
+        # Handle task status update
+        print('Task status update received:', body['payload'])
+    elif event_type == 'test':
+        # Handle test webhook
+        print('Test webhook received:', body['payload'])
+    else:
+        print('Unknown event type:', event_type)
+
+    return {'status': 'success', 'message': 'Webhook received'}
+
+if __name__ == '__main__':
+    uvicorn.run(app, host='0.0.0.0', port=8080)
+```
+
+## 最佳实践
+
+1. **始终验证签名**：未经签名验证切勿处理 webhook 有效载荷
+2. **处理重试机制**：Browser Use 对失败的 webhook 投递最多会重试 5 次
+3. **快速响应**：验证签名后立即返回 200 响应
+4. **异步处理**：在后台任务中处理 webhook 有效载荷
+5. **监控失败情况**：设置 webhook 投递失败的监控机制
+6. **处理未知事件**：对未来可能新增的事件类型实现优雅处理
+
+<Note>
+  需要帮助？请联系我们的支持团队 support@browser-use.com 或加入我们的
+  [Discord 社区](https://link.browser-use.com/discord)
+</Note>

@@ -1,0 +1,88 @@
+---
+title: "提示指南"
+description: "提示技巧与窍门"
+icon: "lightbulb"
+---
+
+提示工程能显著提升性能并解决库的现有局限性。
+
+### 1. 具体化 vs 开放式
+
+**✅ 具体化（推荐）**
+
+```python
+task = """
+1. Go to https://quotes.toscrape.com/
+2. Use extract_structured_data action with the query "first 3 quotes with their authors"
+3. Save results to quotes.csv using write_file action
+4. Do a google search for the first quote and find when it was written
+"""
+```
+
+**❌ 开放式**
+
+```python
+task = "Go to web and make money"
+```
+
+### 2. 直接命名操作
+
+当您确切知道代理应执行什么操作时，请直接按名称引用操作：
+
+```python
+task = """
+1. Use search_google action to find "Python tutorials"
+2. Use click_element_by_index to open first result in a new tab   
+3. Use scroll action to scroll down 2 pages
+4. Use extract_structured_data to extract the names of the first 5 items 
+5. Wait for 2 seconds if the page is not loaded, refresh it and wait 10 sec
+6. Use send_keys action with "Tab Tab ArrowDown Enter" 
+"""
+```
+
+完整操作列表请参阅[可用工具](/customize/tools/available)。
+
+### 3. 通过键盘导航处理交互问题
+
+有时按钮无法点击（您发现了库中的错误 - 请提交问题）。
+好消息是 - 通常您可以通过键盘导航绕过此问题！
+
+```python
+task = """
+If the submit button cannot be clicked:
+1. Use send_keys action with "Tab Tab Enter" to navigate and activate
+2. Or use send_keys with "ArrowDown ArrowDown Enter" for form submission
+"""
+```
+
+### 4. 自定义操作集成
+
+```python
+# When you have custom actions
+@controller.action("Get 2FA code from authenticator app")
+async def get_2fa_code():
+    # Your implementation
+    pass
+
+task = """
+Login with 2FA:
+1. Enter username/password
+2. When prompted for 2FA, use get_2fa_code action
+3. NEVER try to extract 2FA codes from the page manually
+4. ALWAYS use the get_2fa_code action for authentication codes
+"""
+```
+
+### 5. 错误恢复
+
+```python
+task = """
+Robust data extraction:
+1. Go to openai.com to find their CEO
+2. If navigation fails due to anti-bot protection:
+   - Use google search to find the CEO
+3. If page times out, use go_back and try alternative approach
+"""
+```
+
+有效提示的关键在于具体说明操作。

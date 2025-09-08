@@ -1,0 +1,144 @@
+---
+title: "快速入门指南"
+description: ""
+icon: "rocket"
+---
+
+## 1. 快速设置
+
+<Tabs>
+<Tab title="uv">
+```bash 创建环境 
+uv venv --python 3.12
+```
+</Tab>
+<Tab title="pip">
+```bash 使用 python >= 3.11 创建环境 
+python3.12 -m venv .venv
+```
+</Tab>
+</Tabs>
+
+<Tabs>
+<Tab title="Mac/Linux">
+```bash 激活环境
+source .venv/bin/activate
+```
+</Tab>
+<Tab title="Windows">
+```bash 激活环境
+.venv\Scripts\activate
+```
+</Tab>
+</Tabs>
+
+<Tabs>
+<Tab title="uv">
+```bash 安装 browser-use & chromium
+uv pip install browser-use
+uvx playwright install chromium --with-deps 
+```
+</Tab>
+<Tab title="pip">
+```bash 安装 browser-use & chromium
+pip install browser-use
+pip install playwright && playwright install chromium --with-deps
+```
+</Tab>
+</Tabs>
+
+## 2. 选择您喜欢的 LLM
+
+创建一个 `.env` 文件并添加您的 API 密钥。没有密钥？从[免费的 Gemini 密钥](https://aistudio.google.com/app/u/1/apikey?pli=1)开始。
+
+<Tabs>
+<Tab title="Mac/Linux">
+```bash 创建 .env 文件
+touch .env
+```
+</Tab>
+<Tab title="Windows">
+```cmd 创建 .env 文件
+echo. > .env
+```
+</Tab>
+</Tabs>
+
+<Tabs>
+<Tab title="Google">
+```bash 将密钥添加到 .env 文件
+GEMINI_API_KEY=
+```
+</Tab>
+<Tab title="OpenAI">
+```bash 将密钥添加到 .env 文件
+OPENAI_API_KEY=
+```
+</Tab>
+<Tab title="Anthropic">
+```bash 将密钥添加到 .env 文件
+ANTHROPIC_API_KEY=
+```
+</Tab>
+</Tabs>
+
+请参阅[支持的模型](/customize/supported-models)了解更多信息。
+
+## 3. 运行你的第一个智能体
+
+<Tabs>
+<Tab title="谷歌">
+```python agent.py
+from browser_use import Agent, ChatGoogle
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
+
+async def main():
+    llm = ChatGoogle(model="gemini-2.5-flash")
+    task = "Find the number 1 post on Show HN"
+    agent = Agent(task=task, llm=llm)
+    await agent.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+</Tab>
+<Tab title="OpenAI">
+```python agent.py
+from browser_use import Agent, ChatOpenAI
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
+
+async def main():
+    llm = ChatOpenAI(model="gpt-4.1-mini")
+    task = "Find the number 1 post on Show HN"
+    agent = Agent(task=task, llm=llm)
+    await agent.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+</Tab>
+<Tab title="Anthropic">
+```python agent.py
+from browser_use import Agent, ChatAnthropic
+from dotenv import load_dotenv
+import asyncio
+
+load_dotenv()
+
+async def main():
+    llm = ChatAnthropic(model='claude-sonnet-4-0', temperature=0.0)
+    task = "Find the number 1 post on Show HN"
+    agent = Agent(task=task, llm=llm)
+    await agent.run()
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+</Tab>
+</Tabs>

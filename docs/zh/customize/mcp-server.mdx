@@ -1,0 +1,208 @@
+---
+title: "MCP 服务器"
+description: "通过模型上下文协议为AI助手（如Claude Desktop）提供浏览器使用能力"
+icon: "server"
+mode: "wide"
+---
+
+## 概述
+
+MCP（模型上下文协议）服务器允许您将browser-use的浏览器自动化能力暴露给AI助手，如Claude Desktop、Cline和其他MCP兼容客户端。这使得AI助手能够直接通过browser-use执行网页自动化任务。
+
+## 快速开始
+
+### 启动MCP服务器
+
+```bash
+uvx browser-use --mcp
+```
+
+服务器将在stdio模式下启动，准备接受MCP连接。
+
+## Claude Desktop集成
+
+最常见的用例是与Claude Desktop集成。将以下配置添加到您的Claude Desktop配置文件中：
+
+### macOS
+
+编辑 `~/Library/Application Support/Claude/claude_desktop_config.json`：
+
+```json
+{
+  "mcpServers": {
+    "browser-use": {
+      "command": "uvx",
+      "args": ["browser-use", "--mcp"],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-api-key-here"
+      }
+    }
+  }
+}
+```
+
+### Windows 平台
+
+编辑 `%APPDATA%\Claude\claude_desktop_config.json`：
+
+```json
+{
+  "mcpServers": {
+    "browser-use": {
+      "command": "uvx",
+      "args": ["browser-use", "--mcp"],
+      "env": {
+        "OPENAI_API_KEY": "your-openai-api-key-here"
+      }
+    }
+  }
+}
+```
+
+### 环境变量
+
+您可以通过环境变量配置browser-use：
+
+- `OPENAI_API_KEY` - 您的OpenAI API密钥（必需）
+- `ANTHROPIC_API_KEY` - 您的Anthropic API密钥（OpenAI的替代方案）
+- `BROWSER_USE_HEADLESS` - 设置为 `false` 以显示浏览器窗口
+- `BROWSER_USE_DISABLE_SECURITY` - 设置为 `true` 以禁用浏览器安全功能
+
+## 可用工具
+
+MCP服务器暴露了以下浏览器自动化工具：
+
+### 自主代理工具
+
+- **`run_browser_task`** - 通过AI代理运行完整的浏览器自动化任务
+- **`run_browser_task_streaming`** - 功能同上，但支持流式响应
+
+### 直接浏览器控制
+
+- **`browser_navigate`** - 导航至指定URL
+- **`browser_click`** - 按索引点击元素
+- **`browser_type`** - 在元素中输入文本
+- **`browser_get_state`** - 获取当前页面状态和截图
+- **`browser_scroll`** - 滚动页面
+- **`browser_go_back`** - 浏览器后退
+- **`browser_go_forward`** - 浏览器前进
+- **`browser_refresh`** - 刷新当前页面
+
+### 标签页管理
+
+- **`browser_list_tabs`** - 列出所有打开的浏览器标签页
+- **`browser_switch_tab`** - 切换到指定标签页
+- **`browser_close_tab`** - 关闭标签页
+- **`browser_new_tab`** - 打开新标签页
+
+### 内容提取
+
+- **`browser_extract_content`** - 从当前页面提取结构化内容
+- **`browser_take_screenshot`** - 截取当前页面截图
+
+### 文件操作
+
+- **`read_file`** - 从文件读取内容
+- **`write_file`** - 向文件写入内容
+- **`list_files`** - 列出目录中的文件
+
+## 使用示例
+
+配置Claude Desktop后，您可以要求Claude执行浏览器自动化任务：
+
+```
+"Please navigate to example.com and take a screenshot"
+
+"Search for 'browser automation' on Google and summarize the first 3 results"
+
+"Go to GitHub, find the browser-use repository, and tell me about the latest release"
+```
+
+Claude将通过MCP服务器使用browser-use执行这些任务。
+
+## 编程使用
+
+您也可以通过编程方式连接到MCP服务器：
+
+```python
+import asyncio
+from mcp import ClientSession, StdioServerParameters
+from mcp.client.stdio import stdio_client
+
+async def use_browser_mcp():
+    # Connect to browser-use MCP server
+    server_params = StdioServerParameters(
+        command="uvx", 
+        args=["browser-use", "--mcp"]
+    )
+    
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+            
+            # Navigate to a website
+            result = await session.call_tool(
+                "browser_navigate", 
+                arguments={"url": "https://example.com"}
+            )
+            print(result.content[0].text)
+            
+            # Take a screenshot
+            result = await session.call_tool(
+                "browser_take_screenshot", 
+                arguments={}
+            )
+            print("Screenshot taken!")
+
+asyncio.run(use_browser_mcp())
+```
+
+## 故障排除
+
+### 常见问题
+
+**"需要MCP SDK"错误**
+
+```bash
+uv pip install 'browser-use'
+```
+
+**浏览器无法启动**
+
+- 检查是否已安装 Chrome/Chromium
+- 尝试设置 `BROWSER_USE_HEADLESS=false` 以显示浏览器窗口
+- 确保没有其他浏览器实例正在使用相同配置文件
+
+**API密钥问题**
+
+- 验证 `OPENAI_API_KEY` 设置是否正确
+- 检查 API 密钥权限和账单状态
+- 尝试使用 `ANTHROPIC_API_KEY` 作为替代方案
+
+**Claude Desktop 连接问题**
+
+- 配置更改后重启 Claude Desktop
+- 检查配置文件语法是否为有效 JSON
+- 验证文件路径是否符合您的操作系统
+
+### 调试模式
+
+通过以下设置启用调试日志：
+
+```bash
+export BROWSER_USE_LOG_LEVEL=DEBUG
+uvx browser-use --mcp
+```
+
+## 安全考量
+
+- MCP 服务器可访问您的浏览器和文件系统
+- 仅连接受信任的 MCP 客户端
+- 处理敏感网站和数据时需谨慎
+- 对于不可信的自动化任务，考虑在沙盒环境中运行
+
+## 后续步骤
+
+- 浏览 [示例目录](https://github.com/browser-use/browser-use/tree/main/examples/mcp) 获取更多使用模式
+- 查看 [MCP 文档](https://modelcontextprotocol.io/) 了解更多协议信息
+- 加入我们的 [Discord](https://link.browser-use.com/discord) 获取支持和参与讨论

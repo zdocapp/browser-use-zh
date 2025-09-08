@@ -1,0 +1,91 @@
+---
+title: "Cloud SDK"
+description: "了解如何设置您自己的浏览器使用 Cloud SDK"
+icon: "code"
+mode: "wide"
+---
+
+本指南将引导您完成设置您自己的 Browser Use Cloud SDK。
+
+## 构建您自己的客户端 (OpenAPI)
+
+<Note>
+  此方法**仅**在您需要运行简单任务且**不需要细粒度控制**时推荐使用。
+</Note>
+
+构建您自己的客户端的最佳方式是使用我们的 [OpenAPI 规范](http://api.browser-use.com/openapi.json) 来生成类型安全的客户端库。
+
+### Python
+
+使用 [openapi-python-client](https://github.com/openapi-generators/openapi-python-client) 生成现代化的 Python 客户端：
+
+```bash
+# Install the generator
+pipx install openapi-python-client --include-deps
+
+# Generate the client
+openapi-python-client generate --url http://api.browser-use.com/openapi.json
+```
+
+这将创建一个具有完整类型提示、现代数据类和异步支持的 Python 包。
+
+### TypeScript/JavaScript
+
+使用 [OpenAPI TS](https://openapi-ts.dev/) 库为 Browser Use API 生成类型安全的 TypeScript 客户端。
+
+以下指南展示了如何创建一个简单的类型安全的 `fetch` 客户端，但您也可以使用其他生成器。
+
+- React Query - https://openapi-ts.dev/openapi-react-query/
+- SWR - https://openapi-ts.dev/swr-openapi/
+
+<CodeGroup>
+```bash npm
+npm install openapi-fetch 
+npm install -D openapi-typescript typescript
+```
+
+```bash yarn
+yarn add openapi-fetch
+yarn add -D openapi-typescript typescript
+```
+```bash pnpm
+pnpm add openapi-fetch
+pnpm add -D openapi-typescript typescript
+```
+</CodeGroup>
+
+```json title="package.json"
+{
+  "scripts": {
+    "openapi:gen": "openapi-typescript https://api.browser-use.com/openapi.json -o ./src/lib/api/v1.d.ts"
+  }
+}
+```
+
+```bash
+pnpm openapi:gen
+```
+
+```ts
+// client.ts
+
+'use client'
+
+import createClient from 'openapi-fetch'
+import { paths } from '@/lib/api/v1'
+
+export type Client = ReturnType<typeof createClient<paths>>
+
+export const client = createClient<paths>({
+    baseUrl: 'https://api.browser-use.com/',
+
+    // NOTE: You can get your API key from https://cloud.browser-use.com/billing!
+    headers: { Authorization: `Bearer ${apiKey}` },
+})
+
+```
+
+<Note>
+  需要帮助？请联系我们的支持团队 support@browser-use.com 或加入我们的
+  [Discord 社区](https://link.browser-use.com/discord)
+</Note>

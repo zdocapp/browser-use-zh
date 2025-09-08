@@ -1,0 +1,63 @@
+---
+title: "所有参数"
+description: "代理配置选项的完整参考"
+icon: "sliders"
+mode: "wide"
+---
+
+## 可用参数
+
+### 核心设置
+
+- `tools`: 代理可调用的[我们的工具](https://github.com/browser-use/browser-use/blob/main/browser_use/tools/service.py)注册表。[自定义工具示例](https://github.com/browser-use/browser-use/tree/main/examples/custom-functions)
+- `browser`: 浏览器对象，您可以在其中指定浏览器设置。
+- `output_model_schema`: 用于结构化输出验证的 Pydantic 模型类。[示例](https://github.com/browser-use/browser-use/blob/main/examples/features/custom_output.py)
+
+### 视觉与处理
+
+- `use_vision` (默认: `True`): 启用/禁用处理截图的视觉能力
+- `vision_detail_level` (默认: `'auto'`): 截图细节级别 - `'low'`、`'high'` 或 `'auto'`
+- `page_extraction_llm`: 用于页面内容提取的独立 LLM 模型。您可以选择一个小而快的模型，因为它只需要从页面提取文本（默认：与 `llm` 相同）
+
+### 操作与行为
+
+- `initial_actions`: 在主任务开始前无需LLM即可运行的初始操作列表。[示例](https://github.com/browser-use/browser-use/blob/main/examples/features/initial_actions.py)
+- `max_actions_per_step` (默认: `10`): 每个步骤的最大操作数，例如在表单填写时，智能体可以一次性输出10个字段。我们会持续执行操作直到页面发生变化。
+- `max_failures` (默认: `3`): 出现错误的步骤的最大重试次数
+- `final_response_after_failure` (默认: `True`): 如果为True，在达到最大失败次数后尝试强制进行一次最终模型调用并输出中间结果
+- `use_thinking` (默认: `True`): 控制智能体是否使用其内部的"思考"字段进行显式推理步骤。
+- `flash_mode` (默认: `False`): 快速模式，跳过评估、下一个目标和思考过程，仅使用记忆。如果启用`flash_mode`，它将覆盖`use_thinking`并完全禁用思考过程。[示例](https://github.com/browser-use/browser-use/blob/main/examples/getting_started/05_fast_agent.py)
+
+### 系统消息
+
+- `override_system_message`: 完全替换默认系统提示。
+- `extend_system_message`: 向默认系统提示添加额外指令。[示例](https://github.com/browser-use/browser-use/blob/main/examples/features/custom_system_prompt.py)
+
+### 文件与数据管理
+
+- `save_conversation_path`: 保存完整对话历史记录的路径
+- `save_conversation_path_encoding` (默认: `'utf-8'`): 保存对话的编码格式
+- `available_file_paths`: 代理可访问的文件路径列表
+- `sensitive_data`: 需谨慎处理的敏感数据字典。[示例](https://github.com/browser-use/browser-use/blob/main/examples/features/sensitive_data.py)
+
+### 视觉输出
+
+- `generate_gif` (默认: `False`): 生成代理操作GIF。设置为 `True` 或字符串路径
+- `include_attributes`: 页面分析中包含的HTML属性列表
+
+### 性能与限制
+
+- `max_history_items`: LLM内存中保留的最后步骤的最大数量。若为 `None`，则保留所有步骤
+- `llm_timeout` (默认: `90`): LLM调用的超时时间（秒）
+- `step_timeout` (默认: `120`): 每个步骤的超时时间（秒）
+- `directly_open_url` (默认: `True`): 检测到任务中的URL时直接打开
+
+### 高级选项
+
+- `calculate_cost` (默认: `False`): 计算并跟踪API成本
+- `display_files_in_done_text` (默认: `True`): 在完成消息中显示文件信息
+
+### 向后兼容性
+
+- `controller`: `tools` 的别名，用于向后兼容
+- `browser_session`: `browser` 的别名，用于向后兼容

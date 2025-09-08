@@ -1,0 +1,112 @@
+---
+title: "所有参数"
+description: "浏览器配置选项的完整参考"
+icon: "sliders"
+mode: "wide"
+---
+
+## 核心设置
+
+- `cdp_url`: 用于连接现有浏览器实例的 CDP URL（例如 `"http://localhost:9222"`）
+
+## 显示与外观
+
+- `headless`（默认：`None`）：无界面运行浏览器。根据显示可用性自动检测（`True`/`False`/`None`）
+- `window_size`：有界面模式下的浏览器窗口大小。使用字典 `{'width': 1920, 'height': 1080}` 或 `ViewportSize` 对象
+- `window_position`（默认：`{'width': 0, 'height': 0}`）：距离左上角的窗口位置（像素单位）
+- `viewport`：内容区域大小，格式与 `window_size` 相同。使用 `{'width': 1280, 'height': 720}` 或 `ViewportSize` 对象
+- `no_viewport`（默认：`None`）：禁用视口模拟，内容适应窗口大小
+- `device_scale_factor`：设备缩放因子（DPI）。设置为 `2.0` 或 `3.0` 可获得高分辨率截图
+
+## 浏览器行为
+
+- `keep_alive` (默认: `None`): 代理完成后保持浏览器运行
+- `allowed_domains`: 限制导航到特定域名。域名模式格式：
+  - `'example.com'` - 仅匹配 `https://example.com/*`
+  - `'*.example.com'` - 匹配 `https://example.com/*` 和任何子域名 `https://*.example.com/*`
+  - `'http*://example.com'` - 同时匹配 `http://` 和 `https://` 协议
+  - `'chrome-extension://*'` - 匹配任何 Chrome 扩展 URL
+  - **安全**: 出于安全考虑，TLD 中的通配符（例如 `example.*`）**不允许**
+  - 使用列表格式如 `['*.google.com', 'https://example.com', 'chrome-extension://*']`
+- `enable_default_extensions` (默认: `True`): 加载自动化扩展（uBlock Origin、cookie 处理器、ClearURLs）
+- `cross_origin_iframes` (默认: `False`): 启用跨域 iframe 支持（可能增加复杂性）
+- `is_local` (默认: `True`): 是否为本地浏览器实例。对于远程浏览器设置为 `False`。如果设置了 `executable_path`，将自动设置为 `True`。这会影响下载行为。
+
+## 用户数据与配置文件
+
+- `user_data_dir` (默认: 自动生成的临时目录): 浏览器配置文件数据目录。使用 `None` 进入无痕模式
+- `profile_directory` (默认: `'Default'`): Chrome 配置文件子目录名称（`'Profile 1'`、`'Work Profile'` 等）
+- `storage_state`: 浏览器存储状态（cookies、localStorage）。可以是文件路径字符串或字典对象
+
+## 网络与安全
+
+- `proxy`: 使用 `ProxySettings(server='http://host:8080', bypass='localhost,127.0.0.1', username='user', password='pass')` 配置代理
+- `permissions` (默认: `['clipboardReadWrite', 'notifications']`): 授予浏览器的权限。使用列表格式如 `['camera', 'microphone', 'geolocation']`
+
+- `headers`: 连接请求的附加 HTTP 头信息（仅限远程浏览器）
+
+## 浏览器启动
+
+- `executable_path`: 自定义安装的浏览器可执行文件路径。各平台示例：
+  - macOS: `'/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'`
+  - Windows: `'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe'`
+  - Linux: `'/usr/bin/google-chrome'`
+- `channel`: 浏览器渠道 (`'chromium'`, `'chrome'`, `'chrome-beta'`, `'msedge'` 等)
+- `args`: 浏览器的附加命令行参数。使用列表格式: `['--disable-gpu', '--custom-flag=value', '--another-flag']`
+- `env`: 浏览器进程的环境变量。使用字典格式如 `{'DISPLAY': ':0', 'LANG': 'en_US.UTF-8', 'CUSTOM_VAR': 'test'}`
+- `chromium_sandbox` (默认: `True`，Docker 环境除外): 启用 Chromium 沙盒以增强安全性
+- `devtools` (默认: `False`): 自动打开开发者工具面板（需要 `headless=False`）
+- `ignore_default_args`: 要禁用的默认参数列表，或设为 `True` 禁用所有。使用列表如 `['--enable-automation', '--disable-extensions']`
+
+## 时序与性能
+
+- `minimum_wait_page_load_time` (默认: `0.25`): 捕获页面状态前的最小等待时间（秒）
+- `wait_for_network_idle_page_load_time` (默认: `0.5`): 等待网络活动停止的时间（秒）
+- `wait_between_actions` (默认: `0.5`): 智能体操作之间的等待时间（秒）
+
+## AI 集成
+
+- `highlight_elements` (默认: `True`): 为 AI 视觉高亮可交互元素
+
+## 下载与文件
+
+- `accept_downloads` (默认: `True`): 自动接受所有下载
+- `downloads_path`: 下载文件的目录。使用字符串如 `'./downloads'` 或 `Path` 对象
+- `auto_download_pdfs` (默认: `True`): 自动下载 PDF 文件而非在浏览器中查看
+
+## 设备模拟
+
+- `user_agent`: 自定义用户代理字符串。示例: `'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)'`
+- `screen`: 屏幕尺寸信息，格式与 `window_size` 相同
+
+## 录制与调试
+
+- `record_video_dir`: 保存视频录制为 `.mp4` 文件的目录
+- `record_video_size` (默认: `ViewportSize`): 视频录制的帧尺寸（宽度，高度）
+- `record_video_framerate` (默认: `30`): 视频录制使用的帧率
+- `record_har_path`: 保存网络跟踪文件为 `.har` 格式的路径
+- `traces_dir`: 保存完整跟踪文件用于调试的目录
+- `record_har_content` (默认: `'embed'`): HAR 内容模式 (`'omit'`, `'embed'`, `'attach'`)
+- `record_har_mode` (默认: `'full'`): HAR 录制模式 (`'full'`, `'minimal'`)
+
+## 高级选项
+
+- `disable_security` (默认: `False`): ⚠️ **不推荐** - 禁用所有浏览器安全功能
+- `deterministic_rendering` (默认: `False`): ⚠️ **不推荐** - 强制一致渲染但降低性能
+
+---
+
+## 过时的 BrowserProfile
+
+为向后兼容，您可以将上述所有参数传递给 `BrowserProfile`，然后再传递给 `Browser`。
+
+```python
+from browser_use import BrowserProfile
+profile = BrowserProfile(headless=False)
+browser = Browser(browser_profile=profile)
+```
+
+## Browser 与 BrowserSession
+
+`Browser` 是 `BrowserSession` 的别名——它们是完全相同的类：
+使用 `Browser` 可获得更简洁、更直观的代码。

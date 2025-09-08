@@ -1,0 +1,46 @@
+---
+title: "快速入门"
+description: "了解如何开始使用 Browser Use Cloud API"
+icon: "cloud"
+mode: "wide"
+---
+
+<img
+  className="block dark:hidden rounded-2xl"
+  src="/images/cloud-banner.png"
+  alt="Browser Use Cloud Banner"
+/>
+
+<img
+  className="hidden dark:block rounded-2xl"
+  src="/images/cloud-banner-dark.png"
+  alt="Browser Use Cloud Banner"
+/>
+
+<Note>
+  您需要一个有效的订阅和来自
+  [cloud.browser-use.com/billing](https://cloud.browser-use.com/billing) 的 API 密钥。
+  有关详细的定价信息，请参阅我们的[定价页面](/cloud/v1/pricing)。
+</Note>
+
+## 创建您的第一个智能体
+
+要了解 API 的工作原理，请访问[运行任务](/api-reference/api-v1/run-task?playground=open)页面。
+
+```bash
+curl -X POST https://api.browser-use.com/api/v1/run-task \
+  -H "Authorization: Bearer your_api_key_here" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task": "Go to google.com and search for Browser Use"
+  }'
+```
+
+`run-task` API 返回一个任务 ID，您可以查询该 ID 以获取任务状态、实时预览 URL 和结果输出。
+
+<Note>
+  要试用 API，您可以使用 [Browser Use Cloud
+  演练场](https://cloud.browser-use.com/playground)。
+</Note>
+
+完整的实施指南请参见[实施](/cloud/v1/implementation)页面。

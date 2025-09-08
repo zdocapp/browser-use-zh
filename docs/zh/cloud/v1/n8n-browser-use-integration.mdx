@@ -1,0 +1,392 @@
+---
+title: "N8N + Browser Use Cloud 集成指南"
+description: "通过实际工作流示例（竞品研究），学习如何将 Browser Use Cloud API 与 n8n 集成。"
+icon: "plug"
+mode: "wide"
+---
+
+> **TL;DR** – 只需 **3 分钟**，您即可拥有一个 n8n 工作流，该工作流可以：
+>
+> 1.  显示一个表单，询问竞争对手的名称
+> 2.  启动一个 Browser Use 任务，该任务会爬取网页并提取**定价、招聘信息、新功能及公告**
+> 3.  通过**Webhook**等待任务完成
+> 4.  格式化输出并将一条富文本消息发送到 Slack
+
+您可以在下方获取工作流 JSON – 复制它并将其导入 n8n，填入您的 API 密钥，然后点击 _执行_ 🚀。
+
+---
+
+## 为什么在 n8n 中使用 Browser Use？
+
+• **自主浏览** – Browser Use 像真实用户一样打开页面、跟踪链接、点击按钮并读取 DOM 内容。
+
+• **结构化输出** – 您可以_精确地_告诉代理您需要哪些字段。无需脆弱的正则表达式或 XPath。
+
+• **轻松扩展** – 启动数百个任务并通过 Cloud API 监控它们。
+
+n8n 将所有环节连接起来，让您的团队能够即时获取数据——无需 Python 脚本或 CRON 作业。
+
+---
+
+## 前置条件
+
+1.  **Browser Use Cloud API 密钥** – 从您的[账单页面](https://cloud.browser-use.com/billing)获取一个。
+2.  **n8n 实例** – 自托管或 n8n.cloud。（下面的截图使用的是 n8n 1.45+。）
+3.  **Slack 入站 Webhook URL** – 在您的 Slack 工作区中创建一个。
+
+将两个密钥添加到 n8n 的凭证管理器：
+
+```env title=".env example"
+BROWSER_USE_API_KEY="sk-…"
+SLACK_WEBHOOK_URL="https://hooks.slack.com/services/…"
+```
+
+---
+
+## 导入模板
+
+1. 复制下方的[工作流 JSON](#workflow-json) 到剪贴板
+2. 在 n8n 中创建新工作流并粘贴 JSON
+3. 将 _Browser-Use API Key_ 凭证和 _Slack Incoming Webhook URL_ 替换为您自己的
+
+---
+
+## 工作流运行原理
+
+### 1. `表单触发器` – 收集竞争对手名称
+
+包含单个必填字段的公开 n8n 表单。用户提交时，工作流立即触发
+
+### 2. `HTTP 请求 – Browser Use 运行任务`
+
+我们向 `/api/v1/run-task` 发送 POST 请求，包含以下请求体：
+
+```json title="run-task payload"
+{
+  "task": "Do exhaustive research on {{ $json[\"Competitor Name\"] }} and extract all pricing information, job postings, new features and announcements",
+  "save_browser_data": true,
+  "structured_output_json": {
+    "pricing": {
+      "plans": ["string"],
+      "prices": ["string"],
+      "features": ["string"]
+    },
+    "jobs": {
+      "titles": ["string"],
+      "departments": ["string"],
+      "locations": ["string"]
+    },
+    "new_features": { "titles": ["string"], "description": ["string"] },
+    "announcements": { "titles": ["string"], "description": ["string"] }
+  },
+  "metadata": { "source": "n8n-competitor-demo" }
+}
+```
+
+关键部分：
+
+• `structured_output_json` 告知代理返回哪些键值 – 无需后处理
+• 我们通过 `metadata.source` 标记任务，以便 webhook 仅筛选_我们的_任务
+
+### 3. `Webhook` + `条件判断` – 等待任务完成
+
+当任务状态发生变化时 Browser Use 会发送 webhook（设置详情请参阅[Webhooks 指南](/cloud/v1/webhooks)）。我们在 `/get-research-data` 暴露 n8n Webhook 节点，让代理调用它
+
+仅当**同时**满足以下条件时才继续执行：
+
+- `payload.status == "finished"`
+- `payload.metadata.source == "n8n-competitor-demo"`
+
+### 4. `获取任务详情`
+
+webhook 主体包含 `session_id`。我们获取完整任务记录以获得包含第2步结构化 JSON 的 `output` 字段
+
+### 5. `代码节点 – 生成 Slack 消息`
+
+一段简短的 JS 代码片段将 JSON 转换为格式美观的 Slack 消息块，包含表情符号和项目符号。请随意调整格式。
+
+### 6. `HTTP 请求 – 发送至 Slack`
+
+最后我们将消息通过 POST 请求发送到您的入站 webhook，然后庆祝 🎉。
+
+---
+
+## 按需自定义
+
+此工作流仅是一个起点——Browser Use + n8n 为您提供无限可能。以下是一些建议：
+
+| 想要实现...                       | 如何操作                                                                                                                              |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| **提取不同数据**       | 编辑 `structured_output_json` 以精确指定所需字段（价格、评论、联系信息等），并调整 JS 格式化器。 |
+| **发送到 Teams/邮箱/Notion**   | 将最后的 Slack 节点替换为 Teams、Gmail 或 n8n 的 400+ 连接器中的任意一个。                                                               |
+| **自动运行**            | 将表单触发器替换为 Cron 触发器，以实现每日/每周的竞争对手监控。                                                      |
+| **监控多个竞争对手** | 使用 Google Sheets 触发器配合公司列表，并循环遍历它们。                                                               |
+| **添加 AI 分析**              | 将提取的数据通过 OpenAI/Claude 进行处理，以生成洞察和摘要。                                                         |
+| **创建警报**                | 设置条件逻辑，仅在竞争对手宣布新功能或价格变动时发送通知。                                          |
+| **构建仪表板**            | 将数据发送到 Airtable、Notion 或 Google Sheets，以构建实时竞争对手情报仪表板。                                   |
+
+Browser Use 的妙处在于，它处理复杂的网页浏览工作，而您可以专注于构建符合需求的完美工作流程。
+
+---
+
+## 工作流 JSON
+
+<Accordion title="n8n 工作流 JSON (点击展开)">
+```json id="workflow-json"
+{
+  "name": "Competitor Intelligence Workflow with webhooks",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "get-research-data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        176
+      ],
+      "id": "81166dab-eb91-4627-b773-1aa7f7bd86ee",
+      "name": "Webhook",
+      "webhookId": "025bc4bf-00c0-47d4-bd5f-79046674d017"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "8d9701b6-1dc2-4e55-9fe4-ef1735ff1ebc",
+              "leftValue": "={{ $json.body.payload.status }}",
+              "rightValue": "finished",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "7cf18a23-f3d8-4a70-a77c-c286a231fc7f",
+              "leftValue": "={{ $json.body.payload.metadata.source }}",
+              "rightValue": "n8n-competitor-demo",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        176
+      ],
+      "id": "b38737cc-0b8a-4a76-930f-362eb5de9ef9",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "formTitle": "Run Competitor Analysis",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Competitor Name",
+              "placeholder": "(e.g. OpenAI)",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -336,
+        -64
+      ],
+      "id": "fcfc33dd-7d8a-460b-838d-955c65416aea",
+      "name": "On form submission",
+      "webhookId": "b2712d5b-14ae-424b-8733-fe6e77cebd43"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.browser-use.com/api/v1/run-task",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"task\": \"Do exhaustive research on {{ $json['Competitor Name'] }} and extract all pricing information, job postings, new features and announcements\",\n  \"save_browser_data\": true,\n  \"structured_output_json\": \"{\\n  \\\"pricing\\\": {\\n    \\\"plans\\\": [\\\"string\\\"],\\n    \\\"prices\\\": [\\\"string\\\"],\\n    \\\"features\\\": [\\\"string\\\"]\\n  },\\n  \\\"jobs\\\": {\\n    \\\"titles\\\": [\\\"string\\\"],\\n    \\\"departments\\\": [\\\"string\\\"],\\n    \\\"locations\\\": [\\\"string\\\"]\\n  },\\n  \\\"new_features\\\": {\\n    \\\"titles\\\": [\\\"string\\\"],\\n    \\\"description\\\": [\\\"string\\\"]\\n  },\\n  \\\"announcements\\\": {\\n    \\\"titles\\\": [\\\"string\\\"],\\n    \\\"description\\\": [\\\"string\\\"]\\n  }\\n}\",\n\"metadata\": {\"source\": \"n8n-competitor-demo\"}\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -112,
+        -64
+      ],
+      "id": "d10bef40-e2a3-41ff-a507-4f365c13dc52",
+      "name": "BrowserUse Run Task",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "peg6MzgmJNRMCMnT",
+          "name": "Browser-Use API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://api.browser-use.com/api/v1/task/{{ $('Webhook').item.json.body.payload.session_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBearerAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        0,
+        144
+      ],
+      "id": "e49c28ff-11a2-4195-94ab-ca5796572c34",
+      "name": "Get Task details",
+      "credentials": {
+        "httpBearerAuth": {
+          "id": "peg6MzgmJNRMCMnT",
+          "name": "Browser-Use API Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output_data = $input.first().json.output;\nconst data = JSON.parse(output_data);\n\nconst pricing = data?.pricing;\nconst jobs = data?.jobs;\nconst newFeatures = data?.new_features;\nconst announcements = data?.announcements;\n\n// Helper function to format arrays as bullet points\nconst formatAsBullets = (arr, prefix = \"• \" => {\n  if (!arr || arr.length === 0) return \"• N/A\";\n  return arr.map(item => `${prefix}${item}`).join(\"\\n\");\n};\n\nreturn {\n  text: `🏷️ *Pricing*\\nPlans:\\n${formatAsBullets(pricing?.plans)}\\n\\nPrices:\\n${formatAsBullets(pricing?.prices)}\\n\\nFeatures:\\n${formatAsBullets(pricing?.features)}\\n\\n💼 *Jobs*\\nTitles:\\n${formatAsBullets(jobs?.titles)}\\n\\nDepartments:\\n${formatAsBullets(jobs?.departments)}\\n\\nLocations:\\n${formatAsBullets(jobs?.locations)}\\n\\n✨ *New Features*\\nTitles:\\n${formatAsBullets(newFeatures?.titles)}\\n\\nDescription:\\n${formatAsBullets(newFeatures?.description)}\\n\\n📢 *Announcements*\\n${formatAsBullets(announcements?.description)}`\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        144
+      ],
+      "id": "54bc087d-237d-438a-b688-bcbec25d9c45",
+      "name": "Generate Slack message"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        432,
+        144
+      ],
+      "id": "969a16f0-677b-4e46-a8bb-57a80b5daf07",
+      "name": "Send to Slack"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Get Task details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "BrowserUse Run Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Task details": {
+      "main": [
+        [
+          {
+            "node": "Generate Slack message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Slack message": {
+      "main": [
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f3b38678-4821-41ad-952c-df9bbba40fc8",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7a1d1fd830bae2a00010153cf810fd67e0c87b8ae64ceb62273c87183efda365"
+  },
+  "id": "qmhqkZH8DhISWMmc",
+  "tags": []
+}
+```
+</Accordion>
+
+将大括号内的所有内容复制，导入到 n8n 中即可使用。
+
+<Note>
+  遇到问题？请在 [Discord](https://link.browser-use.com/discord) 的 #integrations 频道联系我们——我们很乐意提供帮助。
+</Note>

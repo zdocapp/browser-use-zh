@@ -1,0 +1,93 @@
+---
+title: "添加工具"
+description: ""
+icon: "plus"
+mode: "wide"
+---
+
+示例：
+
+- 确定性点击操作
+- 文件处理
+- API调用
+- 人工介入流程
+- 浏览器交互
+- 调用大语言模型
+- 获取双因素认证码
+- 发送邮件
+- Playwright集成（参见 [GitHub示例](https://github.com/browser-use/browser-use/blob/main/examples/browser/playwright_integration.py)）
+- ...
+
+只需在函数前添加 `@tools.action(...)` 装饰器。
+
+```python
+from browser_use import Tools, Agent
+
+tools = Tools()
+
+@tools.action(description='Ask human for help with a question')
+def ask_human(question: str) -> ActionResult:
+    answer = input(f'{question} > ')
+    return f'The human responded with: {answer}'
+```
+
+```python
+agent = Agent(task='...', llm=llm, tools=tools)
+```
+
+- **`description`** *（必需）* - 工具功能描述，大语言模型据此决定何时调用该工具
+- **`allowed_domains`** - 工具允许运行的域名列表（例如 `['*.example.com']`），默认可在所有域名运行
+
+代理会根据函数参数名称、类型提示和默认值自动填充参数。
+
+## 可用对象
+
+您的函数可以访问以下对象：
+
+- **`browser_session: BrowserSession`** - 当前浏览器会话，用于CDP访问
+- **`cdp_client`** - 直接访问Chrome开发者工具协议的客户端
+- **`page_extraction_llm: BaseChatModel`** - 传入代理的大语言模型，可用于在此处进行自定义LLM调用
+- **`file_system: FileSystem`** - 文件系统访问权限
+- **`available_file_paths: list[str]`** - 可用于上传/处理的文件路径列表
+- **`has_sensitive_data: bool`** - 指示操作是否包含敏感数据
+
+## Pydantic输入
+
+您可以使用Pydantic定义工具参数：
+
+```python
+from pydantic import BaseModel
+
+class Cars(BaseModel):
+    name: str = Field(description='The name of the car, e.g. "Toyota Camry"')
+    price: int = Field(description='The price of the car as int in USD, e.g. 25000')
+
+@tools.action(description='Save cars to file')
+def save_cars(cars: list[Cars]) -> str:
+    with open('cars.json', 'w') as f:
+        json.dump(cars, f)
+    return f'Saved {len(cars)} cars to file'
+
+task = "find cars and save them to file"
+```
+
+## 域名限制
+
+将工具限制在特定域名：
+
+```python
+@tools.action(
+    description='Fill out banking forms',
+    allowed_domains=['https://mybank.com']
+)
+def fill_bank_form(account_number: str) -> str:
+    # Only works on mybank.com
+    return f'Filled form for account {account_number}'
+```
+
+## 高级示例
+
+有关 Playwright 集成的自定义工具完整示例，请参见：
+**[Playwright 集成示例](https://github.com/browser-use/browser-use/blob/main/examples/browser/playwright_integration.py)**
+
+该示例展示了如何创建自定义操作，将 Playwright 的精确浏览器自动化功能与 Browser-Use 结合使用。

@@ -1,0 +1,30 @@
+---
+title: "遥测"
+description: "了解 Browser Use 的遥测功能"
+icon: "chart-mixed"
+mode: "wide"
+---
+
+## 概述
+
+Browser Use 遵循 MIT 许可证免费提供。为帮助我们持续改进该库，我们通过 [PostHog](https://posthog.com) 收集匿名使用数据。这些信息有助于我们了解库的使用情况、更快地修复错误并确定新功能的优先级。
+
+## 选择退出
+
+您可以通过设置环境变量来禁用遥测功能：
+
+```bash .env
+ANONYMIZED_TELEMETRY=false
+```
+
+或在您的 Python 代码中：
+
+```python
+import os
+os.environ["ANONYMIZED_TELEMETRY"] = "false"
+```
+
+<Note>
+  即使启用后，遥测功能对库的性能也毫无影响。相关代码可在 [Telemetry
+  Service](https://github.com/browser-use/browser-use/tree/main/browser_use/telemetry) 中查看。
+</Note>

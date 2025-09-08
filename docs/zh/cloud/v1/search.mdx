@@ -1,0 +1,113 @@
+---
+title: "搜索 API"
+description: "开始使用 Browser Use 的搜索端点从网站提取内容"
+icon: "magnifying-glass"
+mode: "wide"
+---
+
+<Warning>
+  **🧪 测试版 - 此 API 处于测试阶段 - 可能会发生变化，且可能无法始终可用。**
+</Warning>
+
+## 为什么选择 Browser Use 而非传统搜索？
+
+**Browser Use 真正像人类一样浏览网站**，而其他工具仅返回着陆页的缓存数据。Browser Use 实时深入网站导航：
+
+- 🔍 **深度导航**：点击菜单、表单和多页面以查找隐藏内容
+- 🚀 **始终最新**：实时价格、突发新闻、实时分析 - 非缓存结果
+- 🎯 **无陈旧数据**：准确查看页面当前内容
+- 🌐 **动态内容处理**：支持 JavaScript、表单和交互元素
+- 🏠 **无表层限制**：从需要导航或交互的页面获取数据
+
+**其他工具看到的是昨天的前门。Browser Use 探索的是今天的整栋房子。**
+
+## 快速开始
+
+搜索 API 允许您使用 AI 快速从网站提取相关内容。主要有两个端点：
+
+💡 **完整工作示例**可在 [examples/search](https://github.com/browser-use/browser-use/tree/main/examples/search) 文件夹中找到。
+
+### 简单搜索
+
+搜索 Google 并从多个顶级结果中提取内容：
+
+```python
+import aiohttp
+import asyncio
+
+async def simple_search():
+    payload = {
+        "query": "latest AI news",
+        "max_websites": 5,
+        "depth": 2
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            "https://api.browser-use.com/api/v1/simple-search",
+            json=payload,
+            headers=headers
+        ) as response:
+            result = await response.json()
+            return result
+
+asyncio.run(simple_search())
+```
+
+### 搜索网址
+
+从特定 URL 提取内容：
+
+```python
+async def search_url():
+    payload = {
+        "url": "https://browser-use.com/#pricing",
+        "query": "Find pricing information for Browser Use",
+        "depth": 2
+    }
+
+    headers = {
+        "Authorization": "Bearer YOUR_API_KEY",
+        "Content-Type": "application/json"
+    }
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            "https://api.browser-use.com/api/v1/search-url",
+            json=payload,
+            headers=headers
+        ) as response:
+            result = await response.json()
+            return result
+
+asyncio.run(search_url())
+```
+
+## 参数
+
+- **query**: 搜索查询或要提取的内容
+- **depth**: 在每个网站内导航的深度（2-5，默认值：2）
+  - `depth=2`: 检查主页 + 1次点击深度
+  - `depth=3`: 检查主页 + 2次点击深度
+  - `depth=5`: 彻底探索多个导航层级
+- **max_websites**: 要处理的网站数量（仅限简单搜索，默认值：5）
+- **url**: 要从中提取内容的目标URL（仅限搜索网址）
+
+## 定价
+
+### 简单搜索
+
+**每次请求费用**: `1美分 × 深度 × 最大网站数`
+
+示例：depth=2, max_websites=3 = 每次请求6美分
+
+### 搜索网址
+
+**每次请求费用**: `1美分 × 深度`
+
+示例：depth=2 = 每次请求2美分

@@ -1,0 +1,84 @@
+---
+title: "工具响应"
+description: ""
+icon: "arrow-turn-down-left"
+mode: "wide"
+---
+
+工具使用 `ActionResult` 或简单字符串返回结果。
+
+## 返回类型
+
+```python
+@tools.action('My tool')
+def my_tool() -> str:
+    return "Task completed successfully"
+
+@tools.action('Advanced tool')
+def advanced_tool() -> ActionResult:
+    return ActionResult(
+        extracted_content="Main result",
+        long_term_memory="Remember this info",
+        error="Something went wrong",
+        is_done=True,
+        success=True,
+        attachments=["file.pdf"],
+    )
+```
+
+## ActionResult 属性
+
+- `extracted_content` (默认: `None`) - 传递给 LLM 的主要结果，这相当于返回一个字符串。
+- `include_extracted_content_only_once` (默认: `False`) - 对于大型内容设置为 `True`，仅在 LLM 输入中包含一次。
+- `long_term_memory` (默认: `None`) - 这始终包含在所有未来步骤的 LLM 输入中。
+- `error` (默认: `None`) - 错误消息，我们捕获异常并自动设置此项。这始终包含在 LLM 输入中。
+- `is_done` (默认: `False`) - 工具完成整个任务
+- `success` (默认: `None`) - 任务成功（仅在 `is_done=True` 时有效）
+- `attachments` (默认: `None`) - 要显示给用户的文件
+- `metadata` (默认: `None`) - 调试/可观测性数据
+
+## 为什么需要 `extracted_content` 和 `long_term_memory`？
+
+通过这两个属性，您可以控制 LLM 的上下文。
+
+### 1. 始终在上下文中包含简短内容
+
+```python
+def simple_tool() -> str:
+    return "Hello, world!"  # Keep in context for all future steps 
+```
+
+### 2. 显示长内容一次，在上下文中记住子集
+
+```python
+return ActionResult(
+    extracted_content="[500 lines of product data...]",     # Shows to LLM once
+    include_extracted_content_only_once=True,               # Never show full output again
+    long_term_memory="Found 50 products"        # Only this in future steps
+)
+```
+
+我们将完整的 `extracted_content` 保存到文件中，LLM 可以在未来步骤中读取。
+
+### 3. 不显示长内容，在上下文中记住子集
+
+```python
+return ActionResult(
+    extracted_content="[500 lines of product data...]",      # The LLM never sees this because `long_term_memory` overrides it and `include_extracted_content_only_once` is not used
+    long_term_memory="Saved user's favorite products",      # This is shown to the LLM in future steps
+)
+```
+
+## 终止代理
+
+设置 `is_done=True` 以完全停止代理。当您的工具完成整个任务时使用：
+
+```python
+@tools.action(description='Complete the task')
+def finish_task() -> ActionResult:
+    return ActionResult(
+        extracted_content="Task completed!",
+        is_done=True,        # Stops the agent
+        success=True         # Task succeeded 
+    )
+```

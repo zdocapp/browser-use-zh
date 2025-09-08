@@ -1,0 +1,49 @@
+---
+title: "身份验证"
+description: "了解如何使用 Browser Use Cloud API 进行身份验证"
+icon: "lock"
+mode: "wide"
+---
+
+Browser Use Cloud API 使用 API 密钥对请求进行身份验证。您可以从 [Browser Use Cloud 控制面板](https://cloud.browser-use.com/settings/api-keys) 获取 API 密钥。
+
+## API 密钥
+
+所有 API 请求都必须在 `Authorization` 标头中包含您的 API 密钥：
+
+```bash
+Authorization: Bearer YOUR_API_KEY
+```
+
+请妥善保管您的 API 密钥，切勿在 GitHub、客户端代码或浏览器开发者工具等公开可访问的区域共享。API 密钥应安全地存储在环境变量或安全的密钥管理系统中。
+
+## 请求示例
+
+以下是在 Python 请求中包含 API 密钥的示例：
+
+```python
+import requests
+
+API_KEY = 'your_api_key_here'
+BASE_URL = 'https://api.browser-use.com/api/v1'
+HEADERS = {'Authorization': f'Bearer {API_KEY}'}
+
+response = requests.get(f'{BASE_URL}/me', headers=HEADERS)
+print(response.json())
+```
+
+## 验证身份验证
+
+您可以通过向 `/api/v1/me` 端点发送请求来验证 API 密钥的有效性。详情请参阅 [Me 端点文档](/api-reference/api-v1/me)。
+
+## API 密钥安全
+
+为确保 API 密钥的安全性：
+
+1. **切勿在公开可访问的区域共享**您的 API 密钥
+2. **定期轮换**您的 API 密钥
+3. **使用环境变量**在应用程序中存储 API 密钥
+4. **实施适当的访问控制**来管理 API 密钥
+5. **监控 API 密钥使用情况**以检测可疑活动
+
+如果您认为您的 API 密钥已泄露，应立即撤销该密钥，并从您的 Browser Use Cloud 仪表板生成一个新密钥。
